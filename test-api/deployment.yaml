@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-api
+spec:
+  selector:
+    matchLabels:
+      app: test-api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: test-api
+    spec:
+      containers:
+        - name: test-api
+          image: ghcr.io/dasiths/fastapi-demo:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5678
+      targetPort: 80
+  selector:
+    app: test-api
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-api-tls-ingress
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+spec:
+  rules:
+    - host: test-api.app.topadata.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: test-api
+                port:
+                  number: 5678
+  tls:
+    - secretName: test-api-tls
+      hosts:
+        - test-api.app.topadata.ch
+
