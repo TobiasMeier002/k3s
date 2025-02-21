@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: test-api
-          image: ghcr.io/dasiths/fastapi-demo:latest
+          image: nmatsui/hello-world-api
           ports:
             - containerPort: 80
 ---
