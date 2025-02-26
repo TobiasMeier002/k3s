@@ -18,6 +18,8 @@ spec:
       labels:
         app: mysql
     spec:
+      imagePullSecrets:  # <--- Hier wird das Secret hinzugefügt
+        - name: my-docker-secret
       containers:
         - name: mysql
           image: mysql:8
