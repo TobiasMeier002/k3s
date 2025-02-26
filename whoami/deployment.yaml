@@ -1,12 +1,12 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: whoami
+  name: whoami #Pro App neuer Namnespace
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: whoami
+  name: whoami 
 spec:
   selector:
     matchLabels:
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: whoami
-          image: traefik/whoami:v1.9.0
+          image: traefik/whoami:v1.9.0 #Container Image
           ports:
             - containerPort: 80
 ---
@@ -42,10 +42,10 @@ metadata:
   annotations:
     spec.ingressClassName: traefik
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    #traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd #Automatischer Redirect auf HTTPS
 spec:
   rules:
-    - host: whoami.app.topadata.ch
+    - host: whoami.app.topadata.ch #Domain Name *.app.topadata.ch
       http:
         paths:
           - path: /
@@ -58,5 +58,5 @@ spec:
   tls:
     - secretName: whoami-tls
       hosts:
-        - whoami.app.topadata.ch
+        - whoami.app.topadata.ch # Domain Name *.app.topadata.ch
 
