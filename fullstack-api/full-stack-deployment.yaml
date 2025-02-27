@@ -61,7 +61,7 @@ spec:
     spec:
       containers:
         - name: my-api
-          image: meinuser/my-api:latest
+          image: fransafu/simple-rest-golang:1.0.0
           ports:
             - containerPort: 3000
           env:
