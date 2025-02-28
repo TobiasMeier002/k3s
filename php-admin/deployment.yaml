@@ -37,3 +37,28 @@ spec:
   selector:
     app: phpmyadmin
   type: LoadBalancer
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: phpmyadmin-ingress
+  namespace: phpmyadmin
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+spec:
+  rules:
+    - host: phpmyadmin.app.topadata.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: phpmyadmin
+                port:
+                  number: 3000
+  tls:
+    - secretName: phpmyadmin-tls
+      hosts:
+        - phpmyadmin.app.topadata.ch
