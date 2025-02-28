@@ -25,7 +25,7 @@ spec:
           image: phpmyadmin:latest
           env:
             - name: PMA_HOST
-              value: "mysql.phpmyadmin-app.svc.cluster.local"
+              value: "mysql.fullstack-app.svc.cluster.local" #"mysql.phpmyadmin-app.svc.cluster.local"
             - name: PMA_USER
               value: "root"
             - name: PMA_PASSWORD
