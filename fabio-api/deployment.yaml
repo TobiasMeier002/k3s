@@ -33,13 +33,39 @@ spec:
           ports:
             - containerPort: 3000
 ---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fabio-api-ingress
+  namespace: fabio-api # phpmyadmin-app
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+spec:
+  rules:
+    - host: fabio-api.app.topadata.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fabioapi
+                port:
+                  number: 80
+  tls:
+    - secretName: fabioapi-tls
+      hosts:
+        - fabio-api.app.topadata.ch
+---
 apiVersion: v1
 kind: Service
 metadata: 
   name: fabio-api-service
   namespace: fabio-api
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:  # Korrektur hier
     app: fabio-api
   ports:  # Korrektur hier
