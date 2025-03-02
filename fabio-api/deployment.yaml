@@ -7,7 +7,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: fabio-api
-  namespace: fullstack-app
+  namespace: fabio-api
 spec:
   selector:
     matchLabels:
