@@ -53,7 +53,7 @@ spec:
               service:
                 name: fabioapi
                 port:
-                  number: 5678
+                  number: 80
   tls:
     - secretName: fabioapi-tls
       hosts:
@@ -70,5 +70,5 @@ spec:
     app: fabio-api
   ports:  # Korrektur hier
     - protocol: TCP
-      port: 5678
+      port: 80
       targetPort: 3000
