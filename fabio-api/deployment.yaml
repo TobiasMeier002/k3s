@@ -1,0 +1,47 @@
+piVersion: v1
+kind: Namespace
+metadata:
+  name: fabio-api
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fabio-api
+  namespace: fullstack-api
+spec:
+  selector:
+    matchLabels:
+      app: fabio-api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fabio-api
+    spec:
+      containers:
+        - name: fabio-api
+          image: fabioi82/hello-api:latest
+          env:
+            - name: DB_HOST
+              value: "mysql.fabio-api.svc.cluster.local"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              value: "meinPasswort"
+            - name: DB_NAME
+              value: "testdb"
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata: 
+ name: fabio-api-service
+spec:
+ selectors:
+  app: fabio-api
+port:
+  - protocol: TCP
+    port: 80
+    targetPort: 3000
+type: Loadbalancer
