@@ -36,12 +36,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata: 
- name: fabio-api-service
+  name: fabio-api-service
+  namespace: fabio-api
 spec:
- selector:
-  app: fabio-api
-ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 3000
-type: LoadBalancer
+  type: LoadBalancer
+  selector:  # Korrektur hier
+    app: fabio-api
+  ports:  # Korrektur hier
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
