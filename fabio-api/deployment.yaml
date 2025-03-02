@@ -23,7 +23,7 @@ spec:
           image: fabioi82/hello-api:latest
           env:
             - name: DB_HOST
-              value: "mysql.fabio-api.svc.cluster.local"
+              value: "mysql.fullstack-app.svc.cluster.local"
             - name: DB_USER
               value: "root"
             - name: DB_PASSWORD
