@@ -1,0 +1,216 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: k3sapi  # Namespace für MySQL, API und phpMyAdmin
+---
+# MySQL Deployment und Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: k3sapi
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      imagePullSecrets:
+        - name: my-docker-secret
+      containers:
+        - name: mysql
+          image: mysql:8
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "meinPasswort"
+            - name: MYSQL_DATABASE
+              value: "testdb"
+          ports:
+            - containerPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: k3sapi
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    app: mysql
+---
+# API Deployment und Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fabio-api
+  namespace: k3sapi
+spec:
+  selector:
+    matchLabels:
+      app: fabio-api
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fabio-api
+    spec:
+      containers:
+        - name: fabio-api
+          image: fabioi82/hello-api:latest
+          env:
+            - name: DB_HOST
+              value: "mysql.k3sapi.svc.cluster.local"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              value: "meinPasswort"
+            - name: DB_NAME
+              value: "testdb"
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fabio-api-service
+  namespace: k3sapi
+spec:
+  type: ClusterIP
+  selector:
+    app: fabio-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+---
+# PHPMyAdmin Deployment und Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: phpmyadmin
+  namespace: k3sapi
+spec:
+  selector:
+    matchLabels:
+      app: phpmyadmin
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+    spec:
+      imagePullSecrets:
+        - name: my-docker-secret
+      containers:
+        - name: phpmyadmin
+          image: phpmyadmin:latest
+          env:
+            - name: PMA_HOST
+              value: "mysql.k3sapi.svc.cluster.local"
+            - name: PMA_USER
+              value: "root"
+            - name: PMA_PASSWORD
+              value: "meinPasswort"
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: phpmyadmin
+  namespace: k3sapi
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: phpmyadmin
+---
+# Ingress für die API (Fabio)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fabio-api-ingress
+  namespace: k3sapi
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+spec:
+  rules:
+    - host: fabio-api.app.topadata.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fabio-api-service
+                port:
+                  number: 80
+  tls:
+    - secretName: fabioapi-tls
+      hosts:
+        - fabio-api.app.topadata.ch
+---
+# Ingress für phpMyAdmin
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: phpmyadmin-ingress
+  namespace: k3sapi
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+spec:
+  rules:
+    - host: phpmyadmin.app.topadata.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: phpmyadmin
+                port:
+                  number: 80
+  tls:
+    - secretName: phpmyadmin-tls
+      hosts:
+        - phpmyadmin.app.topadata.ch
+---
+# Ingress für die API (Fabio)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fullstack-ingress
+  namespace: k3sapi
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd
+spec:
+  rules:
+    - host: api.app.topadata.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: fabio-api-service
+                port:
+                  number: 80
+  tls:
+    - secretName: fullstack-tls
+      hosts:
+        - api.app.topadata.ch
