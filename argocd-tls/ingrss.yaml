@@ -1,4 +1,4 @@
-apiVersion: networking.k8s.io/v1
+apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
   name: redirect-to-argocd
@@ -41,7 +41,7 @@ metadata:
   annotations:
     spec.ingressClassName: traefik
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd,redirect-to-argocd #Automatischer Redirect auf HTTPS
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd,redirect-to-argocd@kubernetescrd #Automatischer Redirect auf HTTPS
 spec:
   rules:
     - host: argocd.topadata.ch #Domain Name *.app.topadata.ch
