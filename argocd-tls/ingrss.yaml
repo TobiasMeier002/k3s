@@ -55,6 +55,6 @@ spec:
                 port:
                   number: 80
   tls:
-    - secretName: argocd-tls
+    - secretName: argocd-redirect-tls
       hosts:
         - argocd.topadata.ch # Domain Name *.app.topadata.ch
