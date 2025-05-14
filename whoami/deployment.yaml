@@ -59,4 +59,30 @@ spec:
     - secretName: whoami-tls
       hosts:
         - whoami.app.topadata.ch # Domain Name *.app.topadata.ch
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: whoami-tls-ingress
+  annotations:
+    spec.ingressClassName: traefik
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    traefik.ingress.kubernetes.io/router.middlewares: default-redirect-https@kubernetescrd #Automatischer Redirect auf HTTPS
+spec:
+  rules:
+    - host: davide.app.topadata.ch #Domain Name *.app.topadata.ch
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: whoami
+                port:
+                  number: 5678
+  tls:
+    - secretName: whoami-tls
+      hosts:
+        - davide.app.topadata.ch # Domain Name *.app.topadata.ch
+
 
